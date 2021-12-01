@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"io/ioutil"
 	"os"
 )
 
@@ -15,12 +15,10 @@ func main() {
 	ctx := context.Background()
 	client := getClientByToken(ctx, token)
 
-	fileContent := []byte("Content of File")
+	fileContent := readMarkDownToByte("./TIL/test.md")
 	filePath := "_posts/test.md"
 	err := autoCreatePost(ctx, client, user, fileContent, filePath)
-	if err != nil {
-		fmt.Println(err)
-	}
+	checkErr(err)
 }
 
 func getClientByToken(ctx context.Context, token string) *github.Client {
@@ -45,4 +43,16 @@ func autoCreatePost(ctx context.Context, client *github.Client, user string, fil
 		return err
 	}
 	return nil
+}
+
+func readMarkDownToByte(filePath string) []byte {
+	content, err := ioutil.ReadFile(filePath)
+	checkErr(err)
+	return content
+}
+
+func checkErr(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
