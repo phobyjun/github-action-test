@@ -26,3 +26,5 @@ jobs:
 
     - name: Run
       run: go run -v ./...
+      env:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
