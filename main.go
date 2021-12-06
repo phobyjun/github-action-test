@@ -29,7 +29,6 @@ func main() {
 	filePath := "_posts/test1.md"
 	err := autoCreatePost(ctx, client, user, fileContent, filePath)
 	checkErr(err)
-
 }
 
 func getClientByToken(ctx context.Context, token string) *github.Client {
@@ -87,7 +86,9 @@ func getCurrentFiles(targetDir string) []string {
 			if err != nil {
 				return err
 			}
-			files = append(files, path)
+			if !info.IsDir() {
+				files = append(files, path)
+			}
 			return nil
 		})
 	checkErr(err)
