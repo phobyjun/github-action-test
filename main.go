@@ -20,7 +20,7 @@ func main() {
 	}
 
 	user := "phobyjun"
-	token := os.Getenv("MY_GITHUB_TOKEN")
+	token := os.Getenv("ACCESS_TOKEN")
 
 	ctx := context.Background()
 	client := getClientByToken(ctx, token)
