@@ -27,8 +27,7 @@ func main() {
 
 	fileContent := readMarkDownToByte("./TIL/test1.md")
 	filePath := "_posts/test1.md"
-	err := autoCreatePost(ctx, client, user, fileContent, filePath)
-	checkErr(err)
+	autoCreatePost(ctx, client, user, fileContent, filePath)
 }
 
 func getClientByToken(ctx context.Context, token string) *github.Client {
@@ -41,7 +40,7 @@ func getClientByToken(ctx context.Context, token string) *github.Client {
 	return client
 }
 
-func autoCreatePost(ctx context.Context, client *github.Client, user string, fileContent []byte, filePath string) error {
+func autoCreatePost(ctx context.Context, client *github.Client, user string, fileContent []byte, filePath string) {
 	opts := &github.RepositoryContentFileOptions{
 		Message:   github.String("auto create by go-github"),
 		Content:   fileContent,
@@ -49,10 +48,7 @@ func autoCreatePost(ctx context.Context, client *github.Client, user string, fil
 		Committer: &github.CommitAuthor{Name: github.String("Junseok Yoon"), Email: github.String("phobyjun@gmail.com")},
 	}
 	_, _, err := client.Repositories.CreateFile(ctx, user, user+".github.io", filePath, opts)
-	if err != nil {
-		return err
-	}
-	return nil
+	checkErr(err)
 }
 
 func readMarkDownToByte(filePath string) []byte {
@@ -65,12 +61,36 @@ func getNewPosts(targetDir, fileHistory string) []string {
 	files := getCurrentFiles(targetDir)
 	history := getFileHistory(fileHistory)
 	posts := difference(files, history)
+	syncHistory(files, fileHistory)
 	return posts
+}
+
+func syncHistory(files []string, fileHistory string) {
+	f, err := os.OpenFile(
+		fileHistory,
+		os.O_WRONLY,
+		os.FileMode(0644))
+	defer func() {
+		err := f.Close()
+		checkErr(err)
+	}()
+	checkErr(err)
+	writer := bufio.NewWriter(f)
+	for _, file := range files {
+		_, err := writer.WriteString(file + "\n")
+		checkErr(err)
+	}
+	wErr := writer.Flush()
+	checkErr(wErr)
 }
 
 func getFileHistory(fileHistory string) []string {
 	var history []string
 	file, err := os.Open(fileHistory)
+	defer func() {
+		err := file.Close()
+		checkErr(err)
+	}()
 	checkErr(err)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
