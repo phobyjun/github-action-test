@@ -3,21 +3,18 @@ package main
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
 	targetDir := "./TIL"
 	fileHistory := ".history"
 	posts := getNewPosts(targetDir, fileHistory)
-	for _, post := range posts {
-		fmt.Println(post)
-	}
 
 	user := "phobyjun"
 	token := os.Getenv("ACCESS_TOKEN")
@@ -25,9 +22,12 @@ func main() {
 	ctx := context.Background()
 	client := getClientByToken(ctx, token)
 
-	fileContent := readMarkDownToByte("./TIL/test1.md")
-	filePath := "_posts/test1.md"
-	autoCreatePost(ctx, client, user, fileContent, filePath)
+	for _, post := range posts {
+		s := strings.Split(post, "\\")
+		filePath := "_posts/" + s[len(s)-1]
+		fileContent := readMarkDownToByte(post)
+		autoCreatePost(ctx, client, user, fileContent, filePath)
+	}
 }
 
 func getClientByToken(ctx context.Context, token string) *github.Client {
