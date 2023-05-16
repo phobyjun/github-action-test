@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// hello world
 func main() {
 	targetDir := "./TIL"
 	fileHistory := ".history"
